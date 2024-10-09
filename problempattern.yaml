@@ -1,0 +1,48 @@
+--
+- name: Manage Problem Pattern and Launch Ansible Template
+  hosts: localhost
+  gather_facts: no
+  vars:
+    aac_api_url: "{{ aac_api_url }}"  # URL of Ansible Automation Controller
+    aac_token: "{{ aac_token }}"      # API Access Token
+    template_id: "{{ template_id }}"   # Template ID to launch
+    feature_flag_url: "{{ feature_flag_url }}"  # URL for the feature flag service
+    feature_id: "{{ feature_id }}"     # Feature ID to disable
+  tasks:
+    - name: Disable Problem Pattern
+      uri:
+        url: "{{ feature_flag_url }}/v1/flags/{{ feature_id }}/"
+        method: PUT
+        headers:
+          accept: application/json
+          Content-Type: application/json
+        body_format: json
+        body:
+          enabled: false
+        status_code: 200
+      register: disable_result
+    - name: Launch Ansible Template
+      uri:
+        url: "{{ aac_api_url }}/api/v2/job_templates/{{ template_id }}/launch/"
+        method: POST
+        headers:
+          Authorization: "Bearer {{ aac_token }}"
+          Content-Type: application/json
+        body_format: json
+        status_code: 201
+      register: template_launch_result
+    - name: Show Results
+      debug:
+        msg:
+          - "Problem Pattern Disable Result: {{ disable_result.status }}"
+          - "Template Launch Result: {{ template_launch_result.status }}"
+
+
+
+
+
+
+
+
+
+
