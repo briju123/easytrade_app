@@ -1,4 +1,4 @@
---
+---
 - name: Manage Problem Pattern and Launch Ansible Template
   hosts: localhost
   gather_facts: no
