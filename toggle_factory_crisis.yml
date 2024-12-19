@@ -1,0 +1,39 @@
+---
+- name: Toggle Factory Crisis Feature Flag
+  hosts: localhost
+  vars:
+    api_url: "http://easytrade-frontend-easytrade.apps.cluster-t4jgw.dynamic.redhatworkshops.io/feature-flag-service/v1/flags/factory_crisis"
+
+  tasks:
+    - name: Get the current state of the Factory Crisis flag
+      uri:
+        url: "{{ api_url }}"
+        method: GET
+        headers:
+          Content-Type: "application/json"
+      register: response
+
+    - name: Parse the current state
+      set_fact:
+        current_state: "{{ response.json.enabled }}"
+
+    - name: Toggle the Factory Crisis flag
+      uri:
+        url: "{{ api_url }}"
+        method: PUT
+        headers:
+          Content-Type: "application/json"
+        body: >
+          {{
+            {
+              "enabled": false if current_state | default(false) else true
+            } | to_json
+          }}
+      when: current_state is not none
+
+    - name: Show result
+      debug:
+        msg: >
+          The Factory Crisis flag is now {{
+            "disabled" if not current_state else "enabled"
+          }}.
