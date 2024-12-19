@@ -1,0 +1,26 @@
+---
+- name: Disable "K8s: high CPU usage" feature
+  hosts: localhost
+  gather_facts: no
+  vars:
+    feature_flag_url: "http://easytrade-frontend-easytrade.apps.cluster-t4jgw.dynamic.redhatworkshops.io/feature-flag-service/v1/flags/high_cpu_usage"
+    headers:
+      Content-Type: "application/json"
+  tasks:
+    - name: Check the current state of the feature flag
+      uri:
+        url: "{{ feature_flag_url }}"
+        method: GET
+      register: response
+    - name: Disable the feature flag if enabled
+      uri:
+        url: "{{ feature_flag_url }}"
+        method: PUT
+        headers:
+          Content-Type: "application/json"
+        body: |
+          {
+            "enabled": false
+          }
+        body_format: json
+      when: response.json.enabled == true
