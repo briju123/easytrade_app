@@ -3,7 +3,6 @@
   hosts: localhost
   vars:
     api_url: "http://easytrade-frontend-easytrade.apps.cluster-t4jgw.dynamic.redhatworkshops.io/feature-flag-service/v1/flags/factory_crisis"
-
   tasks:
     - name: Get the current state of the Factory Crisis flag
       uri:
