@@ -1,34 +1,19 @@
 ---
 - name: Disable OrderController Service Error
   hosts: localhost
-  vars:
-    kubeconfig_path: "~/.kube/config"  # Replace with the actual path to your kubeconfig file
   tasks:
-    - name: Check if the feature flag is enabled
-      shell: |
-        oc get --raw /apis/feature-flag-service/v1/flags/credit_card_meltdown --kubeconfig={{ kubeconfig_path }}
-      register: raw_flag_status
-      failed_when: raw_flag_status.rc != 0
+    - name: Disable credit card meltdown feature flag
+      uri:
+        url: "http://easytrade-frontend-easytrade.apps.cluster-t4jgw.dynamic.redhatworkshops.io/feature-flag-service/v1/flags/credit_card_meltdown"
+        method: PUT
+        headers:
+          Content-Type: "application/json"
+        body_format: json
+        body:
+          enabled: false
+        validate_certs: no
+      register: response
 
-    - name: Parse feature flag status
-      set_fact:
-        flag_status: "{{ raw_flag_status.stdout | from_json }}"
-
-    - name: Disable the feature flag if enabled
-      shell: |
-        curl -X PUT "http://easytrade-frontend-easytrade.apps.cluster-t4jgw.dynamic.redhatworkshops.io/feature-flag-service/v1/flags/credit_card_meltdown" \
-        -H "Content-Type: application/json" \
-        -d '{"enabled": false}'
-      when: flag_status.enabled == true
-      register: disable_flag
-      failed_when: disable_flag.rc != 0
-
-    - name: Display the action result
+    - name: Display result
       debug:
-        msg: "Feature flag 'credit_card_meltdown' is now disabled."
-      when: flag_status.enabled == true
-
-    - name: Display no action message
-      debug:
-        msg: "Feature flag 'credit_card_meltdown' was already disabled."
-      when: flag_status.enabled != true
+        var: response.status
