@@ -1,0 +1,28 @@
+---
+- name: Disable OrderController Service Error
+  hosts: localhost
+  tasks:
+    - name: Check if the feature flag is enabled
+      shell: |
+        oc get --raw /apis/feature-flag-service/v1/flags/credit_card_meltdown | jq '.enabled'
+      register: flag_status
+      failed_when: flag_status.rc != 0
+
+    - name: Disable the feature flag if enabled
+      shell: |
+        curl -X PUT "http://easytrade-frontend-easytrade.apps.cluster-t4jgw.dynamic.redhatworkshops.io/feature-flag-service/v1/flags/credit_card_meltdown" \
+        -H "Content-Type: application/json" \
+        -d '{"enabled": false}'
+      when: flag_status.stdout | trim | lower == "true"
+      register: disable_flag
+      failed_when: disable_flag.rc != 0
+
+    - name: Display the action result
+      debug:
+        msg: "Feature flag 'credit_card_meltdown' is now disabled."
+      when: flag_status.stdout | trim | lower == "true"
+
+    - name: Display no action message
+      debug:
+        msg: "Feature flag 'credit_card_meltdown' was already disabled."
+      when: flag_status.stdout | trim | lower != "true"
