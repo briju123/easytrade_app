@@ -1,10 +1,12 @@
 ---
 - name: Disable OrderController Service Error
   hosts: localhost
+  vars:
+    kubeconfig_path: "/path/to/kubeconfig"  # Replace with the actual path to your kubeconfig file
   tasks:
     - name: Check if the feature flag is enabled
       shell: |
-        oc get --raw /apis/feature-flag-service/v1/flags/credit_card_meltdown
+        oc get --raw /apis/feature-flag-service/v1/flags/credit_card_meltdown --kubeconfig={{ kubeconfig_path }}
       register: raw_flag_status
       failed_when: raw_flag_status.rc != 0
 
