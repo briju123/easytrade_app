@@ -2,7 +2,7 @@
 - name: Disable OrderController Service Error
   hosts: localhost
   vars:
-    kubeconfig_path: "/path/to/kubeconfig"  # Replace with the actual path to your kubeconfig file
+    kubeconfig_path: "~/.kube/config"  # Replace with the actual path to your kubeconfig file
   tasks:
     - name: Check if the feature flag is enabled
       shell: |
